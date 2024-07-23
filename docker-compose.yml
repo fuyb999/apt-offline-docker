@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  pkg-downloader:
+    image: ubuntu:${UBUNTU_VERSION:-22.04}
+    user: "0"
+    privileged: true
+    volumes:
+      - ./docker-entrypoint.sh:/docker-entrypoint.sh
+      - ./debs:/tmp/debs:z
+    environment:
+      - PKG_DOWNLOAD_LIST=${PKG_DOWNLOAD_LIST}
+    command: >
+      bash -c '
+        if [ x${UBUNTU_VERSION} == x ]; then
+          echo "Set the UBUNTU_VERSION environment variable in the .env file";
+          exit 1;
+        fi;
+        if [ x${PKG_DOWNLOAD_LIST} == x ]; then
+          echo "Set the PKG_DOWNLOAD_LIST environment variable in the .env file";
+          exit 1;
+        fi;
+        chmod +x /docker-entrypoint.sh
+        /docker-entrypoint.sh
+        echo "All done!";
+      '
