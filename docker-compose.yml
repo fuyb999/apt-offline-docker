@@ -3,7 +3,7 @@ version: "3.8"
 services:
   downloader:
     image: ubuntu:${UBUNTU_VERSION:-22.04}
-    user: "0"
+    user: "0:0" # $(id -u):$(id -g)
     privileged: true
     volumes:
       - ./docker-entrypoint.sh:/docker-entrypoint.sh
