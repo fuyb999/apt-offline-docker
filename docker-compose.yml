@@ -12,11 +12,11 @@ services:
       - PKG_DOWNLOAD_LIST=${PKG_DOWNLOAD_LIST}
     command: >
       bash -c '
-        if [ x${UBUNTU_VERSION} == x ]; then
+        if [ "x${UBUNTU_VERSION}" == "x" ]; then
           echo "Set the UBUNTU_VERSION environment variable in the .env file";
           exit 1;
         fi;
-        if [ x${PKG_DOWNLOAD_LIST} == x ]; then
+        if [ "x${PKG_DOWNLOAD_LIST}" == "x" ]; then
           echo "Set the PKG_DOWNLOAD_LIST environment variable in the .env file";
           exit 1;
         fi;
