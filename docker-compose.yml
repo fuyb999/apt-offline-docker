@@ -18,6 +18,7 @@ services:
           exit 1;
         fi;
         echo "All done!";
+      '
 
   apk-offline:
     depends_on:
