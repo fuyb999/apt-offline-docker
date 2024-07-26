@@ -7,6 +7,7 @@ services:
     user: "0:0"
     privileged: true
     volumes:
+      - ./Dockerfile:/tmp/Dockerfile:rw
       - ./docker-entrypoint.sh:/docker-entrypoint.sh
       - ./debs:/tmp/debs:z
     environment:
@@ -20,6 +21,11 @@ services:
         if [ "x${PKG_DOWNLOAD_LIST}" == "x" ]; then
           echo "Set the PKG_DOWNLOAD_LIST environment variable in the .env file";
           exit 1;
+        fi;
+        if [ -z "$(grep ubuntu:${UBUNTU_VERSION} /tmp/Dockerfile)" ]; then
+          sed -i -e "s/FROM ubuntu:.*/FROM ubuntu:${UBUNTU_VERSION}/" /tmp/Dockerfile;
+          echo "The UBUNTU_VERSION has changed. Please try run `docker-compose up` again.";
+          exit 0;
         fi;
         /docker-entrypoint.sh;
         echo "All done!";
