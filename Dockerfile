@@ -1,4 +1,5 @@
 ARG UBUNTU_VERSION
+ARG PKG_DOWNLOAD_LIST
 FROM ubuntu:${UBUNTU_VERSION}
 
 ENV SAVE_PATH=/tmp/debs
@@ -21,6 +22,8 @@ RUN curl -fSsL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor
 RUN apt-get update
 
 RUN wget https://github.com/rickysarraf/apt-offline/releases/download/v1.8.5/apt-offline-1.8.5.tar.gz -O - | tar --strip-components=1 -zx -C /usr/bin
+
+RUN apt-get install -y $PKG_DOWNLOAD_LIST
 
 ADD docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
