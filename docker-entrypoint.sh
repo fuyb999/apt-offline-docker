@@ -29,15 +29,6 @@ fi
 apt-get update
 
 rm -rf $SAVE_PATH/{apt-offline.sig,apt-offline.zip}
-# apt-offline依赖python3（通过apt install 安装的apt-offline，运行时报错）
-#wget https://github.com/rickysarraf/apt-offline/releases/download/v1.8.5/apt-offline-1.8.5.tar.gz -O - | tar -zx
-
-# 卸载掉否则无法打包的apt-offline.zip中
-#apt-get remove -y curl wget gpg lsb-core software-properties-common build-essential g++ gcc make && apt-get autoremove -y
-#apt-get install -y python3
-
-cd apt-offline
-./apt-offline set --update --upgrade $SAVE_PATH/apt-offline.sig
-./apt-offline set $SAVE_PATH/apt-offline.sig --install-packages $PKG_DOWNLOAD_LIST
-./apt-offline get $SAVE_PATH/apt-offline.sig --bundle $SAVE_PATH/apt-offline.zip
-cd -
+apt-offline set --update --upgrade $SAVE_PATH/apt-offline.sig
+apt-offline set $SAVE_PATH/apt-offline.sig --install-packages $PKG_DOWNLOAD_LIST
+apt-offline get $SAVE_PATH/apt-offline.sig --bundle $SAVE_PATH/apt-offline.zip
