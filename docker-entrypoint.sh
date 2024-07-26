@@ -1,6 +1,6 @@
 #!/bin/bash
 
-apt-get apt-get install -y $PKG_DOWNLOAD_LIST
+apt-get update && apt-get upgrade && apt-get install -y $PKG_DOWNLOAD_LIST
 
 rm -rf $SAVE_PATH/{apt-offline.sig,apt-offline.zip}
 
