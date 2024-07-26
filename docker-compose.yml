@@ -17,17 +17,17 @@ services:
           echo "Set the PKG_DOWNLOAD_LIST environment variable in the .env file";
           exit 1;
         fi;
-        echo 'ok' > /tmp/ok;
+        echo 'ok' > /tmp/.unlock;
         until [ -f /tmp/output/apt-offline.zip ] ; do sleep 30; done;
         echo "All done!";
       '
     healthcheck:
-      test: [ "CMD-SHELL", "[ -d /tmp/ok ]" ]
+      test: [ "CMD-SHELL", "[ -f /tmp/.unlock ]" ]
       interval: 1s
       timeout: 5s
       retries: 120
 
-  apk-offline:
+  downloader:
     depends_on:
       setup:
         condition: service_healthy
