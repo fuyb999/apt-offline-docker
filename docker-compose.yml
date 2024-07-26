@@ -6,7 +6,7 @@ services:
     user: "0:0"
     privileged: true
     environment:
-      - PKG_DOWNLOAD_LIST=${PKG_DOWNLOAD_LIST}
+      - ./debs:/tmp/debs:z
     command: >
       bash -c '
         if [ "x${UBUNTU_VERSION}" == "x" ]; then
@@ -17,8 +17,15 @@ services:
           echo "Set the PKG_DOWNLOAD_LIST environment variable in the .env file";
           exit 1;
         fi;
+        echo 'ok' > /tmp/ok;
+        until [ -f /tmp/debs/apt-offline.zip ] ; do sleep 30; done;
         echo "All done!";
       '
+    healthcheck:
+      test: [ "CMD-SHELL", "[ -d /tmp/ok ]" ]
+      interval: 1s
+      timeout: 5s
+      retries: 120
 
   apk-offline:
     depends_on:
