@@ -21,7 +21,6 @@ services:
           echo "Set the PKG_DOWNLOAD_LIST environment variable in the .env file";
           exit 1;
         fi;
-        chmod +x /docker-entrypoint.sh;
         /docker-entrypoint.sh;
         echo "All done!";
       '
