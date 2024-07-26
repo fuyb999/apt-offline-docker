@@ -1,4 +1,5 @@
-FROM ubuntu:22.04
+ARG UBUNTU_VERSION
+FROM ubuntu:${UBUNTU_VERSION}
 
 ENV SAVE_PATH=/tmp/debs
 RUN sed -i -E "s/(archive|security).ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g" /etc/apt/sources.list
