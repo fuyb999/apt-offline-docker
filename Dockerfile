@@ -2,7 +2,7 @@ ARG UBUNTU_VERSION
 ARG PKG_DOWNLOAD_LIST
 FROM ubuntu:${UBUNTU_VERSION}
 
-ENV SAVE_PATH=/tmp/debs
+ENV SAVE_PATH=/tmp/output
 RUN sed -i -E "s/(archive|security).ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g" /etc/apt/sources.list
 
 RUN apt-get update && apt-get upgrade && apt-get install -y curl wget gpg lsb-core software-properties-common python3
@@ -25,7 +25,6 @@ RUN wget https://github.com/rickysarraf/apt-offline/releases/download/v1.8.5/apt
 
 #RUN apt-get install -y ${PKG_DOWNLOAD_LIST}
 RUN apt-get install -y bash git curl wget jq tar bzip2 zip unzip xz-utils rar unrar p7zip-full vim openssh-server net-tools build-essential g++ gcc make libglvnd-dev pkg-config cmake language-pack-zh-hans language-pack-zh-hans-base nvidia-container-toolkit docker-ce
-
 
 ADD docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
