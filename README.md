@@ -14,3 +14,5 @@ tar -zxvf apt-offline-1.8.5.tar.gz
 cd apt-offline
 ./apt-offline install <path>/apt-offline.zip
 ```
+
+https://www.jianshu.com/p/a3c7173e61b1
