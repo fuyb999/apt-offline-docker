@@ -29,7 +29,8 @@ services:
 
   apk-offline:
     depends_on:
-      - setup
+      setup:
+        condition: service_healthy
     image: ubuntu:${UBUNTU_VERSION:-22.04}-apk-offline
     build: 
       context: .
