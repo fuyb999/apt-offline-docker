@@ -23,7 +23,9 @@ RUN apt-get update
 
 RUN wget https://github.com/rickysarraf/apt-offline/releases/download/v1.8.5/apt-offline-1.8.5.tar.gz -O - | tar --strip-components=1 -zx -C /usr/bin
 
-RUN apt-get install -y $PKG_DOWNLOAD_LIST
+#RUN apt-get install -y ${PKG_DOWNLOAD_LIST}
+RUN apt-get install -y bash git curl wget jq tar bzip2 zip unzip xz-utils rar unrar p7zip-full vim openssh-server net-tools build-essential g++ gcc make libglvnd-dev pkg-config cmake language-pack-zh-hans language-pack-zh-hans-base nvidia-container-toolkit docker-ce
+
 
 ADD docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh

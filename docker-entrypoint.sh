@@ -2,6 +2,7 @@
 
 # apt-get update && apt-get upgrade && apt-get install -y $PKG_DOWNLOAD_LIST
 
+SAVE_PATH=/tmp/output
 rm -rf $SAVE_PATH/{apt-offline.sig,apt-offline.zip}
 
 apt-offline set --update --upgrade $SAVE_PATH/apt-offline.sig
