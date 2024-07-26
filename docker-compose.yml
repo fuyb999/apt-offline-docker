@@ -1,18 +1,10 @@
 version: "3.8"
 
 services:
-  apk-offline:
-    image: ubuntu:${UBUNTU_VERSION:-22.04}-apk-offline
-    build: 
-      context: .
-      args:
-       - UBUNTU_VERSION:${UBUNTU_VERSION}
+  setup:
+    image: ubuntu:${UBUNTU_VERSION:-22.04}
     user: "0:0"
     privileged: true
-    volumes:
-      - ./Dockerfile:/tmp/Dockerfile:rw
-      - ./docker-entrypoint.sh:/docker-entrypoint.sh
-      - ./debs:/tmp/debs:z
     environment:
       - PKG_DOWNLOAD_LIST=${PKG_DOWNLOAD_LIST}
     command: >
@@ -25,11 +17,20 @@ services:
           echo "Set the PKG_DOWNLOAD_LIST environment variable in the .env file";
           exit 1;
         fi;
-        #if [ -z "$(grep ubuntu:${UBUNTU_VERSION} /tmp/Dockerfile)" ]; then
-          #sed -i -e "s/FROM ubuntu:.*/FROM ubuntu:${UBUNTU_VERSION}/" /tmp/Dockerfile;
-          #echo "The UBUNTU_VERSION has changed. Please try run `docker-compose up` again.";
-          #exit 0;
-        #fi;
-        /docker-entrypoint.sh;
         echo "All done!";
-      '
+
+  apk-offline:
+    depends_on:
+      - setup
+    image: ubuntu:${UBUNTU_VERSION:-22.04}-apk-offline
+    build: 
+      context: .
+      args:
+       - UBUNTU_VERSION:${UBUNTU_VERSION}
+    user: "0:0"
+    privileged: true
+    volumes:
+      - ./docker-entrypoint.sh:/docker-entrypoint.sh
+      - ./debs:/tmp/debs:z
+    environment:
+      - PKG_DOWNLOAD_LIST=${PKG_DOWNLOAD_LIST}
