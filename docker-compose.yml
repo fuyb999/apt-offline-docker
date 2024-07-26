@@ -28,6 +28,7 @@ services:
       context: .
       args:
        - UBUNTU_VERSION=${UBUNTU_VERSION}
+       - PKG_DOWNLOAD_LIST=${PKG_DOWNLOAD_LIST}
     user: "0:0"
     privileged: true
     volumes:
