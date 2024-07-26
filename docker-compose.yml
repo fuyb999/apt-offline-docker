@@ -27,7 +27,7 @@ services:
     build: 
       context: .
       args:
-       - UBUNTU_VERSION:${UBUNTU_VERSION}
+       - UBUNTU_VERSION=${UBUNTU_VERSION}
     user: "0:0"
     privileged: true
     volumes:
