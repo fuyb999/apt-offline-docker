@@ -7,7 +7,7 @@ SAVE_PATH=/tmp/debs
 sed -i -E "s/(archive|security).ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g" /etc/apt/sources.list
 
 REQUIRE_PKG="curl wget gpg lsb_release add-apt-repository"
-apt-get update && apt-get install -y curl wget gpg lsb-core software-properties-common apt-offline
+apt-get update && apt-get install -y curl wget gpg lsb-core software-properties-common python3 apt-offline
 
 if [ -n "$(echo $PKG_DOWNLOAD_LIST | grep 'nvidia-container-toolkit')" ]; then
    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
