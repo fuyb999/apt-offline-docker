@@ -1,0 +1,24 @@
+FROM ubuntu:22.04
+
+ENV SAVE_PATH=/tmp/debs
+RUN sed -i -E "s/(archive|security).ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g" /etc/apt/sources.list
+
+RUN apt-get update && apt-get upgrade && apt-get install -y curl wget gpg lsb-core software-properties-common python3
+
+RUN curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+   && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+   sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+   tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+
+RUN curl -fsSL https://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu/gpg | apt-key add -
+  add-apt-repository "deb [arch=amd64] https://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu $(lsb_release -cs) stable" && \
+
+RUN curl -fSsL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor | tee /usr/share/keyrings/google-chrome.gpg > /dev/null && \
+  echo deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main | tee && \
+  /etc/apt/sources.list.d/google-chrome.list
+
+RUN apt-get update
+
+# apt-offline依赖python3（通过apt install 安装的apt-offline，运行时报错）
+RUN wget https://github.com/rickysarraf/apt-offline/releases/download/v1.8.5/apt-offline-1.8.5.tar.gz -O - | tar --strip-components=1 -zx -C /usr/bin
+
