@@ -19,6 +19,9 @@ RUN curl -fSsL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor
 
 RUN apt-get update
 
-# apt-offline依赖python3（通过apt install 安装的apt-offline，运行时报错）
 RUN wget https://github.com/rickysarraf/apt-offline/releases/download/v1.8.5/apt-offline-1.8.5.tar.gz -O - | tar --strip-components=1 -zx -C /usr/bin
 
+ADD docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+CMD ["/bin/sh", "/docker-entrypoint.sh"]
