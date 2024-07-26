@@ -7,7 +7,7 @@ SAVE_PATH=/tmp/debs
 sed -i -E "s/(archive|security).ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g" /etc/apt/sources.list
 
 REQUIRE_PKG="curl wget gpg lsb_release add-apt-repository"
-apt-get update && apt-get install -y curl wget gpg lsb-core software-properties-common python3
+apt-get update && apt-get install -y curl wget gpg lsb-core software-properties-common apt-offline
 
 if [ -n "$(echo $PKG_DOWNLOAD_LIST | grep 'nvidia-container-toolkit')" ]; then
    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
@@ -30,13 +30,14 @@ apt-get update
 
 rm -rf $SAVE_PATH/{apt-offline.sig,apt-offline.zip}
 # apt-offline依赖python3（通过apt install 安装的apt-offline，运行时报错）
-wget https://github.com/rickysarraf/apt-offline/releases/download/v1.8.5/apt-offline-1.8.5.tar.gz -O - | tar -zx
+#wget https://github.com/rickysarraf/apt-offline/releases/download/v1.8.5/apt-offline-1.8.5.tar.gz -O - | tar -zx
 
 # 卸载掉否则无法打包的apt-offline.zip中
-apt-get purge -y curl wget gpg lsb-core software-properties-common python3
-apt-get install -y python3
+#apt-get remove -y curl wget gpg lsb-core software-properties-common build-essential g++ gcc make && apt-get autoremove -y
+#apt-get install -y python3
 
 cd apt-offline
-./apt-offline set $SAVE_PATH/apt-offline.sig --update --upgrade --install-packages $PKG_DOWNLOAD_LIST
+./apt-offline set --update --upgrade $SAVE_PATH/apt-offline.sig
+./apt-offline set $SAVE_PATH/apt-offline.sig --install-packages $PKG_DOWNLOAD_LIST
 ./apt-offline get $SAVE_PATH/apt-offline.sig --bundle $SAVE_PATH/apt-offline.zip
 cd -
