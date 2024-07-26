@@ -17,8 +17,8 @@ if [ -n "$(echo $PKG_DOWNLOAD_LIST | grep 'nvidia-container-toolkit')" ]; then
 fi
 
 if [ -n "$(echo $PKG_DOWNLOAD_LIST | grep 'docker-ce')" ]; then
-  curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | apt-key add -
-  add-apt-repository "deb [arch=amd64] https://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
+  curl -fsSL https://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu/gpg | apt-key add -
+  add-apt-repository "deb [arch=amd64] https://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
 fi
 
 if [ -n "$(echo $PKG_DOWNLOAD_LIST | grep 'google-chrome-stable')" ]; then
@@ -26,7 +26,10 @@ if [ -n "$(echo $PKG_DOWNLOAD_LIST | grep 'google-chrome-stable')" ]; then
   echo deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main | tee /etc/apt/sources.list.d/google-chrome.list
 fi
 
-apt-get update
+#cp -r /usr/share/keyrings $SAVE_PATH
+
+apt-get update && apt-get install -y $PKG_DOWNLOAD_LIST
+
 
 rm -rf $SAVE_PATH/{apt-offline.sig,apt-offline.zip}
 
