@@ -17,8 +17,11 @@ services:
           echo "Set the PKG_DOWNLOAD_LIST environment variable in the .env file";
           exit 1;
         fi;
-        echo 'ok' > /tmp/.unlock;
-        until [ -f /tmp/output/apt-offline.zip ] ; do sleep 30; done;
+        #echo 'ok' > /tmp/.unlock;
+        sed -i -E "s/(archive|security).ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g" /etc/apt/sources.list;
+        apt-get update && apt-get install -y -d ${PKG_DOWNLOAD_LIST}
+        cp -r /var/cache/apt/archives/* /tmp/output
+        # until [ -f /tmp/output/apt-offline.zip ] ; do sleep 30; done;
         echo "All done!";
       '
     healthcheck:
