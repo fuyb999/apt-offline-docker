@@ -9,6 +9,7 @@ apt-get upgrade && \
   apt-offline get $SAVE_PATH/apt-offline.sig --bundle $SAVE_PATH/apt-offline.zip && \
   tar -czvf $SAVE_PATH/gpg-keys.tar.gz \
       /etc/apt/trusted.gpg.d/*.gpg \
-      /usr/share/keyrings/*.gpg
+      /usr/share/keyrings/*.gpg && \
+  tar -czvf apt-offline.tar.gz $SAVE_PATH/apt-offline.sig $SAVE_PATH/apt-offline.zip $SAVE_PATH/gpg-keys.tar.gz /usr/bin/apt-offline
 
 tail -f /dev/null
