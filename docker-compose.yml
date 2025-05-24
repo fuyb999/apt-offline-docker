@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   setup:
-    image: ubuntu:${UBUNTU_VERSION:-22.04}
+    image: ubuntu:${UBUNTU_VERSION:-22.04}-apk-offline
     user: "0:0"
     privileged: true
     environment:
@@ -28,18 +28,19 @@ services:
       retries: 120
 
   downloader:
+    build:
+      context: .
+      args:
+        - UBUNTU_VERSION=${UBUNTU_VERSION:-22.04}
     depends_on:
       setup:
         condition: service_healthy
     image: ubuntu:${UBUNTU_VERSION:-22.04}-apk-offline
-    build: 
-      context: .
-      args:
-       - UBUNTU_VERSION=${UBUNTU_VERSION}
     user: "0:0"
     privileged: true
+#    entrypoint: tail -f /dev/null
     volumes:
       - ./docker-entrypoint.sh:/docker-entrypoint.sh
-      - ./output:/tmp/output:rw
+#      - ./output:/tmp/output:rw
     environment:
       - PKG_DOWNLOAD_LIST=${PKG_DOWNLOAD_LIST}
