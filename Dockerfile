@@ -1,8 +1,6 @@
 # 第一阶段：构建 apt-offline
 FROM pschmitt/pyinstaller:3.10 AS pyinstaller
 
-WORKDIR /tmp/
-
 RUN apt-get update && \
     apt-get install -y curl tar pyqt5-dev-tools man2html-base python3-debianbts
 
@@ -18,17 +16,16 @@ RUN /entrypoint.sh /app/apt-offline/apt-offline.py
 
 RUN chmod +x /app/dist/apt-offline
 
-# 第二阶段：最终镜像
-ARG UBUNTU_VERSION=22.04
-FROM ubuntu:${UBUNTU_VERSION:-22.04}
 
-COPY --from=pyinstaller /app/dist/apt-offline /usr/bin
+# 第二阶段：设置镜像源
+ARG UBUNTU_VERSION=22.04
+FROM ubuntu:${UBUNTU_VERSION:-22.04} AS builder
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
     apt-get upgrade && \
     apt-get install -y bash curl gpg lsb-core software-properties-common
-
-ENV DEBIAN_FRONTEND=noninteractive
 
 RUN true && \
     # nvidia-container-toolkit
@@ -42,15 +39,24 @@ RUN true && \
     gpg --batch --no-tty --yes --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
     echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] \
     https://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu $(lsb_release -cs) stable" | \
-    tee /etc/apt/sources.list.d/docker.list && \
-    # uninstall
-    apt-get purge -y curl gpg lsb-core software-properties-common && \
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    tee /etc/apt/sources.list.d/docker.list
+
+# 第三阶段：最终镜像
+ARG UBUNTU_VERSION=22.04
+FROM ubuntu:${UBUNTU_VERSION:-22.04}
+
+COPY --from=pyinstaller /app/dist/apt-offline /usr/bin
+COPY --from=builder /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg /usr/share/keyrings/
+COPY --from=builder /usr/share/keyrings/docker-archive-keyring.gpg /usr/share/keyrings/
+#COPY --from=builder /etc/apt/trusted.gpg.d/nvidia-container-toolkit-keyring.gpg /etc/apt/trusted.gpg.d/
+#COPY --from=builder /etc/apt/trusted.gpg.d/docker-archive-keyring.gpg /etc/apt/trusted.gpg.d/
+COPY --from=builder /etc/apt/sources.list.d/nvidia-container-toolkit.list /etc/apt/sources.list.d/
+COPY --from=builder /etc/apt/sources.list.d/docker.list /etc/apt/sources.list.d/
 
 ADD docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
 CMD ["/bin/sh", "/docker-entrypoint.sh"]
+
+
 
