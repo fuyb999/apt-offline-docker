@@ -11,6 +11,9 @@ sudo docker-compose up
 
 ## offline install
 ```shell
-sudo tar -zxvf apt-offline.tar.gz -C /
-sudo apt-offline install --extra-keyring /usr/share/keyrings/ /tmp/apt-offline.zip
+#sudo tar -zxvf apt-offline.tar.gz -C /
+#sudo apt-offline install --extra-keyring /usr/share/keyrings/ /tmp/apt-offline.zip
+
+tar -zxvf apt-offline.tar.gz -C /
+sudo apt-get update
 ```
