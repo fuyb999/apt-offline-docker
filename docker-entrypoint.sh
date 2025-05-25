@@ -9,6 +9,7 @@ apt-get upgrade && \
   apt-offline get $SAVE_PATH/apt-offline.sig --bundle $SAVE_PATH/apt-offline.zip && \
   tar -czvf $SAVE_PATH/apt-offline.tar.gz \
     /usr/bin/apt-offline \
+    /usr/local/lib/libmagic.so.1.0.0 \
     $SAVE_PATH/apt-offline.sig \
     $SAVE_PATH/apt-offline.zip \
     /etc/apt/trusted.gpg.d/*.gpg \

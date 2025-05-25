@@ -2,19 +2,27 @@
 FROM pschmitt/pyinstaller:3.10 AS pyinstaller
 
 RUN apt-get update && \
-    apt-get install -y curl tar pyqt5-dev-tools man2html-base python3-debianbts
+    apt-get install -y curl tar pyqt5-dev-tools man2html-base python3-debianbts libmagic-dev
 
-RUN pip install argparse python-magic soappy pysimplesoap
+RUN pip install argparse soappy pylzma pysimplesoap
 
 WORKDIR /app/apt-offline
 RUN curl -fSsL https://github.com/rickysarraf/apt-offline/releases/download/v1.8.6/apt-offline-1.8.6.tar.gz | \
     tar --strip-components=1 -zxvf - -C ./ && \
     mv apt-offline apt-offline.py && \
-    rm -f requirements.txt
+    rm -f requirements.txt && \
+    sed -i -E 's|(.*LoadLibrary)\(.*\)(.*)|\1\("/usr/local/lib/libmagic.so.1.0.0"\)\2|g' ./apt_offline_core/AptOfflineMagicLib.py
 
-RUN /entrypoint.sh /app/apt-offline/apt-offline.py
+
+RUN /entrypoint.sh \
+#    --add-binary "/usr/lib/x86_64-linux-gnu/libmagic.so.1.0.0:./" \
+    /app/apt-offline/apt-offline.py
+
+RUN ls /app/dist -l
+
 
 RUN chmod +x /app/dist/apt-offline
+
 
 
 # 第二阶段：设置镜像源
@@ -46,6 +54,8 @@ ARG UBUNTU_VERSION=22.04
 FROM ubuntu:${UBUNTU_VERSION:-22.04}
 
 COPY --from=pyinstaller /app/dist/apt-offline /usr/bin
+COPY --from=pyinstaller /usr/lib/x86_64-linux-gnu/libmagic.so.1.0.0 /usr/local/lib/
+
 COPY --from=builder /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg /usr/share/keyrings/
 COPY --from=builder /usr/share/keyrings/docker-archive-keyring.gpg /usr/share/keyrings/
 #COPY --from=builder /etc/apt/trusted.gpg.d/nvidia-container-toolkit-keyring.gpg /etc/apt/trusted.gpg.d/

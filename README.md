@@ -5,14 +5,12 @@
 2. set the PKG_DOWNLOAD_LIST environment variable in the .env file  
 3. get apt-offline.zip  
 ```shell
+sudo docker-compose build downloader
 sudo docker-compose up
 ```
 
-## install apt-offline.zip
+## offline install
 ```shell
-tar -zxvf apt-offline-1.8.5.tar.gz
-cd apt-offline
-./apt-offline install <path>/apt-offline.zip
+sudo tar -zxvf apt-offline.tar.gz -C /
+sudo apt-offline install --extra-keyring /usr/share/keyrings/ /tmp/apt-offline.zip
 ```
-
-https://www.jianshu.com/p/a3c7173e61b1
