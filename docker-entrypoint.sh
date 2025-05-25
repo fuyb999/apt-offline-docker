@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SAVE_PATH=/tmp/
+SAVE_PATH=/tmp
 rm -rf $SAVE_PATH/* /etc/apt/sources.list.d/archive_uri-https_mirrors_ustc_edu_cn_docker-ce_linux_ubuntu-jammy.list
 
 apt-get update && \
@@ -9,7 +9,7 @@ apt-get upgrade && \
   apt-offline get $SAVE_PATH/apt-offline.sig --bundle $SAVE_PATH/apt-offline.zip && \
   tar -czvf $SAVE_PATH/apt-offline.tar.gz \
     /usr/bin/apt-offline \
-    /usr/local/lib/libmagic.so.1.0.0 \
+    /usr/lib/x86_64-linux-gnu/libmagic.so.1.0.0 \
     $SAVE_PATH/apt-offline.sig \
     $SAVE_PATH/apt-offline.zip \
     /etc/apt/trusted.gpg.d/*.gpg \

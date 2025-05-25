@@ -11,18 +11,21 @@ RUN curl -fSsL https://github.com/rickysarraf/apt-offline/releases/download/v1.8
     tar --strip-components=1 -zxvf - -C ./ && \
     mv apt-offline apt-offline.py && \
     rm -f requirements.txt && \
-    sed -i -E 's|(.*LoadLibrary)\(.*\)(.*)|\1\("/usr/local/lib/libmagic.so.1.0.0"\)\2|g' ./apt_offline_core/AptOfflineMagicLib.py
+    sed -i -E 's|(.*LoadLibrary)\(.*\)(.*)|\1\("/usr/lib/x86_64-linux-gnu/libmagic.so.1.0.0"\)\2|g' ./apt_offline_core/AptOfflineMagicLib.py
 
+#RUN ldd /usr/lib/x86_64-linux-gnu/libmagic.so.1.0.0 && tail -f /dev/null
+
+#COPY AptOfflineMagicLib.py ./apt_offline_core/AptOfflineMagicLib.py
+
+#RUN ldd /usr/lib/x86_64-linux-gnu/libmagic.so.1.0.0 | awk '/=>/ {print $3}' | sort -u
+#
+#RUN STATICX=1 STATICX_ARGS="-l /usr/lib/x86_64-linux-gnu/libmagic.so.1.0.0"  /entrypoint.sh \
+#    /app/apt-offline/apt-offline.py
 
 RUN /entrypoint.sh \
-#    --add-binary "/usr/lib/x86_64-linux-gnu/libmagic.so.1.0.0:./" \
     /app/apt-offline/apt-offline.py
 
-RUN ls /app/dist -l
-
-
 RUN chmod +x /app/dist/apt-offline
-
 
 
 # 第二阶段：设置镜像源
@@ -53,8 +56,9 @@ RUN true && \
 ARG UBUNTU_VERSION=22.04
 FROM ubuntu:${UBUNTU_VERSION:-22.04}
 
-COPY --from=pyinstaller /app/dist/apt-offline /usr/bin
-COPY --from=pyinstaller /usr/lib/x86_64-linux-gnu/libmagic.so.1.0.0 /usr/local/lib/
+#COPY --from=pyinstaller /app/dist/apt-offline_static /usr/bin/apt-offline
+COPY --from=pyinstaller /app/dist/apt-offline /usr/bin/apt-offline
+COPY --from=pyinstaller /usr/lib/x86_64-linux-gnu/libmagic.so.1.0.0 /usr/lib/x86_64-linux-gnu/
 
 COPY --from=builder /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg /usr/share/keyrings/
 COPY --from=builder /usr/share/keyrings/docker-archive-keyring.gpg /usr/share/keyrings/
