@@ -9,6 +9,9 @@ apt-get upgrade && \
   apt-offline get $SAVE_PATH/apt-offline.sig --bundle $SAVE_PATH/apt-offline.zip && \
   tar -czvf $SAVE_PATH/apt-offline.tar.gz \
     /usr/bin/apt-offline \
+    /usr/share/misc/magic \
+    /usr/share/misc/magic.mgc \
+    /usr/lib/x86_64-linux-gnu/libmagic.so.1 \
     /usr/lib/x86_64-linux-gnu/libmagic.so.1.0.0 \
     $SAVE_PATH/apt-offline.sig \
     $SAVE_PATH/apt-offline.zip \

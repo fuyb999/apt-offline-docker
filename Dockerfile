@@ -2,7 +2,7 @@
 FROM pschmitt/pyinstaller:3.10 AS pyinstaller
 
 RUN apt-get update && \
-    apt-get install -y curl tar pyqt5-dev-tools man2html-base python3-debianbts libmagic-dev
+    apt-get install -y curl tar pyqt5-dev-tools man2html-base python3-debianbts libmagic1
 
 RUN pip install argparse soappy pylzma pysimplesoap
 
@@ -11,7 +11,7 @@ RUN curl -fSsL https://github.com/rickysarraf/apt-offline/releases/download/v1.8
     tar --strip-components=1 -zxvf - -C ./ && \
     mv apt-offline apt-offline.py && \
     rm -f requirements.txt && \
-    sed -i -E 's|(.*LoadLibrary)\(.*\)(.*)|\1\("/usr/lib/x86_64-linux-gnu/libmagic.so.1.0.0"\)\2|g' ./apt_offline_core/AptOfflineMagicLib.py
+    sed -i -E 's|(.*LoadLibrary)\(.*\)(.*)|\1\("/usr/lib/x86_64-linux-gnu/libmagic.so.1"\)\2|g' ./apt_offline_core/AptOfflineMagicLib.py
 
 #RUN ldd /usr/lib/x86_64-linux-gnu/libmagic.so.1.0.0 && tail -f /dev/null
 
@@ -58,6 +58,9 @@ FROM ubuntu:${UBUNTU_VERSION:-22.04}
 
 #COPY --from=pyinstaller /app/dist/apt-offline_static /usr/bin/apt-offline
 COPY --from=pyinstaller /app/dist/apt-offline /usr/bin/apt-offline
+COPY --from=pyinstaller /usr/share/misc/magic /usr/share/misc/magic
+COPY --from=pyinstaller /usr/share/misc/magic.mgc /usr/share/misc/magic.mgc
+COPY --from=pyinstaller /usr/lib/x86_64-linux-gnu/libmagic.so.1 /usr/lib/x86_64-linux-gnu/
 COPY --from=pyinstaller /usr/lib/x86_64-linux-gnu/libmagic.so.1.0.0 /usr/lib/x86_64-linux-gnu/
 
 COPY --from=builder /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg /usr/share/keyrings/
