@@ -1,6 +1,12 @@
 # 第一阶段：构建 apt-offline
 FROM pschmitt/pyinstaller:3.10 AS pyinstaller
 
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN sed -i 's|http://deb.debian.org|http://archive.debian.org|g' /etc/apt/sources.list && \
+    sed -i 's|http://security.debian.org|http://archive.debian.org|g' /etc/apt/sources.list && \
+    echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/10no-check-valid-until
+
 RUN apt-get update && \
     apt-get install -y curl tar pyqt5-dev-tools man2html-base python3-debianbts libmagic1
 
@@ -12,15 +18,6 @@ RUN curl -fSsL https://github.com/rickysarraf/apt-offline/releases/download/v1.8
     mv apt-offline apt-offline.py && \
     rm -f requirements.txt && \
     sed -i -E 's|(.*LoadLibrary)\(.*\)(.*)|\1\("/usr/lib/x86_64-linux-gnu/libmagic.so.1"\)\2|g' ./apt_offline_core/AptOfflineMagicLib.py
-
-#RUN ldd /usr/lib/x86_64-linux-gnu/libmagic.so.1.0.0 && tail -f /dev/null
-
-#COPY AptOfflineMagicLib.py ./apt_offline_core/AptOfflineMagicLib.py
-
-#RUN ldd /usr/lib/x86_64-linux-gnu/libmagic.so.1.0.0 | awk '/=>/ {print $3}' | sort -u
-#
-#RUN STATICX=1 STATICX_ARGS="-l /usr/lib/x86_64-linux-gnu/libmagic.so.1.0.0"  /entrypoint.sh \
-#    /app/apt-offline/apt-offline.py
 
 RUN /entrypoint.sh \
     /app/apt-offline/apt-offline.py
@@ -34,8 +31,11 @@ FROM ubuntu:${UBUNTU_VERSION:-22.04} AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+RUN sed -i -E 's/(archive|security).ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
+    echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/10no-check-valid-until
+
 RUN apt-get update && \
-    apt-get upgrade && \
+#    apt-get upgrade && \
     apt-get install -y bash curl gpg lsb-core software-properties-common
 
 RUN true && \
@@ -52,9 +52,13 @@ RUN true && \
     https://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu $(lsb_release -cs) stable" | \
     tee /etc/apt/sources.list.d/docker.list
 
+
 # 第三阶段：最终镜像
 ARG UBUNTU_VERSION=22.04
 FROM ubuntu:${UBUNTU_VERSION:-22.04}
+
+RUN sed -i -E 's/(archive|security).ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
+    echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/10no-check-valid-until
 
 #COPY --from=pyinstaller /app/dist/apt-offline_static /usr/bin/apt-offline
 COPY --from=pyinstaller /app/dist/apt-offline /usr/bin/apt-offline
