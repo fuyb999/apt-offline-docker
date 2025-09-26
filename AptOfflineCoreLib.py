@@ -1620,10 +1620,10 @@ def fetcher(args):
                         return True
                     else:
                         if attempt < max_retries:
-                            log.warning(f"{PackageName} 下载失败，{max_retries - attempt} 次重试机会剩余")
+                            log.warn(f"{PackageName} 下载失败，{max_retries - attempt} 次重试机会剩余\n")
                             time.sleep(2 ** attempt)  # 指数退避
                         else:
-                            log.error(f"{PackageName} 下载失败，已达到最大重试次数")
+                            log.err(f"{PackageName} 下载失败，已达到最大重试次数\n")
 
                 return False
 
