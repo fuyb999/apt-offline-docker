@@ -14,6 +14,6 @@ cd /tmp/apt-offline/ && dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz &
 tee /etc/apt/sources.list.d/local.list << EOF
 deb [trusted=yes] file:/tmp/apt-offline ./
 EOF
-tar -zcvf /tmp/apt-offline.tar.gz /tmp/apt-offline/ /etc/apt/sources.list.d/local.list
+tar -Jcvf /tmp/apt-offline-mirror.tar.xz /tmp/apt-offline/ /etc/apt/sources.list.d/local.list
 
 tail -f /dev/null

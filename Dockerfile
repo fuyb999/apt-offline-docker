@@ -19,6 +19,8 @@ RUN curl -fSsL https://github.com/rickysarraf/apt-offline/releases/download/v1.8
     rm -f requirements.txt && \
     sed -i -E 's|(.*LoadLibrary)\(.*\)(.*)|\1\("/usr/lib/x86_64-linux-gnu/libmagic.so.1"\)\2|g' ./apt_offline_core/AptOfflineMagicLib.py
 
+ADD AptOfflineCoreLib.py ./apt_offline_core/AptOfflineCoreLib.py
+
 RUN /entrypoint.sh \
     /app/apt-offline/apt-offline.py
 
