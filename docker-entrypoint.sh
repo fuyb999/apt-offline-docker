@@ -8,7 +8,7 @@ rm -rf $SAVE_PATH/* /etc/apt/sources.list.d/archive_uri-https_mirrors_ustc_edu_c
 apt-get update && \
 apt-get -y upgrade && \
   apt-offline set $SAVE_PATH/apt-offline.sig --update --upgrade --install-packages $PKG_DOWNLOAD_LIST && \
-  apt-offline get $SAVE_PATH/apt-offline.sig --bundle $SAVE_PATH/apt-offline.zip
+  apt-offline get $SAVE_PATH/apt-offline.sig --bundle $SAVE_PATH/apt-offline.zip || true
 
 apt-get install -y dpkg-dev unzip
 
@@ -21,4 +21,5 @@ EOF
 
 tar -Jcvf /tmp/apt-offline-mirror.tar.xz /tmp/apt-offline/ /etc/apt/sources.list.d/local.list
 
+echo 'done'
 tail -f /dev/null

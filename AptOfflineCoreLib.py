@@ -1599,27 +1599,39 @@ def fetcher(args):
                         LINE_OVERWRITE_FULL,
                     )
                 )
-                if FetcherInstance.download_from_web(url, pkgFile, Str_DownloadDir):
-                    log.success("%s done %s\n" %
-                                (PackageName, LINE_OVERWRITE_FULL))
-                    FetcherInstance.writeData(pkgFile)
-                    FetcherInstance.writeToCache(pkgFile)
-                    FetcherInstance.processBugReports(PackageName)
-                    FetcherInstance.updateValue(download_size)
-                    if PackageName in list(PackageInstalledVersion.keys()):
-                        FetcherInstance.buildChangelog(
-                            pkgFile, PackageInstalledVersion[PackageName]
-                        )
-                else:
-                    log.err("Failed to download %s\n" % (PackageName))
-                    errlist.append(PackageName)
+                retry_count = 0
+                max_retries = 10
+                success = False
+
+                while retry_count < max_retries and not success:
+                    if FetcherInstance.download_from_web(url, pkgFile, Str_DownloadDir):
+                        log.success("%s done %s\n" %
+                                    (PackageName, LINE_OVERWRITE_FULL))
+                        FetcherInstance.writeData(pkgFile)
+                        FetcherInstance.writeToCache(pkgFile)
+                        FetcherInstance.processBugReports(PackageName)
+                        FetcherInstance.updateValue(download_size)
+                        if PackageName in list(PackageInstalledVersion.keys()):
+                            FetcherInstance.buildChangelog(
+                                pkgFile, PackageInstalledVersion[PackageName]
+                            )
+                        success = True
+                    else:
+                        retry_count += 1
+                        if retry_count < max_retries:
+                            log.warn("Failed to download %s, retrying... (%d/%d)\n" %
+                                     (PackageName, retry_count, max_retries))
+                        else:
+                            log.err("Failed to download %s after %d attempts\n" %
+                                    (PackageName, max_retries))
+                            errlist.append(PackageName)
         else:
 
             def DownloadPackages(PackageName, PackageFile, max_retries=0):
                 """
                 下载包并带有重试机制
                 """
-                import time
+                # import time
                 for attempt in range(max_retries + 1):
                     if FetcherInstance.download_from_web(
                             PackageName, PackageFile, Str_DownloadDir
@@ -1633,10 +1645,11 @@ def fetcher(args):
                         return True
                     else:
                         if attempt < max_retries:
-                            log.warn(f"{PackageName} 下载失败，{max_retries - attempt} 次重试机会剩余\n")
-                            time.sleep(2 ** attempt)  # 指数退避
+                            log.warn(f"{PackageName} Failed to download，{max_retries - attempt} retries left\n")
+                            # time.sleep(2 ** attempt)  # 指数退避
                         else:
-                            log.err(f"{PackageName} 下载失败，已达到最大重试次数\n")
+                            log.err("Failed to download %s after %d attempts\n" %
+                                    (PackageName, max_retries))
 
                 return False
 

@@ -38,7 +38,6 @@ services:
     image: ubuntu:${UBUNTU_VERSION:-22.04}-apk-offline
     user: "0:0"
     privileged: true
-#    entrypoint: tail -f /dev/null
     volumes:
       - ./docker-entrypoint.sh:/docker-entrypoint.sh
 #      - ./output:/tmp/output:rw
