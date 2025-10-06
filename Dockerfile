@@ -3,14 +3,14 @@ FROM pschmitt/pyinstaller:3.10 AS pyinstaller
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN sed -i 's|http://deb.debian.org|http://archive.debian.org|g' /etc/apt/sources.list && \
+RUN sed -i 's|http://deb.debian.org/debian|https://mirrors.aliyun.com/debian-archive/debian|g' /etc/apt/sources.list && \
     sed -i 's|http://security.debian.org|http://archive.debian.org|g' /etc/apt/sources.list && \
     echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/10no-check-valid-until
 
 RUN apt-get update && \
     apt-get install -y curl tar pyqt5-dev-tools man2html-base python3-debianbts libmagic1
 
-RUN pip install argparse soappy pylzma pysimplesoap
+RUN pip install argparse soappy pylzma pysimplesoap -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple some-package
 
 WORKDIR /app/apt-offline
 RUN curl -fSsL https://github.com/rickysarraf/apt-offline/releases/download/v1.8.6/apt-offline-1.8.6.tar.gz | \
