@@ -45,6 +45,7 @@ ENV WINEDLLOVERRIDES="mscoree,mshtml="
 RUN xvfb-run -a wineboot --init && \
     xvfb-run winetricks -q vcrun2019 dotnet48
 
-RUN xvfb-run winetricks -q corefont
+ADD corefonts /home/wineuser/.cache/winetricks/corefonts
+RUN xvfb-run winetricks -q corefonts
 
 RUN xvfb-run -a wine cmd /c "echo 32-bit environment ready"
