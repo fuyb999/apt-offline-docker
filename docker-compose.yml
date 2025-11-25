@@ -39,7 +39,10 @@ services:
     user: "0:0"
     privileged: true
     volumes:
+      - /usr/share/zoneinfo:/usr/share/zoneinfo
+      - /etc/ssl/certs:/etc/ssl/certs
       - ./docker-entrypoint.sh:/docker-entrypoint.sh
 #      - ./output:/tmp/output:rw
     environment:
+      - TZ=Asia/Shanghai
       - PKG_DOWNLOAD_LIST=${PKG_DOWNLOAD_LIST}
