@@ -1,48 +1,27 @@
-version: "3.8"
-
 services:
-  setup:
-    image: ubuntu:${UBUNTU_VERSION:-22.04}-apk-offline
-    user: "0:0"
-    privileged: true
-    environment:
-      - ./output:/tmp/output:rw
-    command: >
-      bash -c '
-        if [ "x${UBUNTU_VERSION}" == "x" ]; then
-          echo "Set the UBUNTU_VERSION environment variable in the .env file";
-          exit 1;
-        fi;
-        if [ "x${PKG_DOWNLOAD_LIST}" == "x" ]; then
-          echo "Set the PKG_DOWNLOAD_LIST environment variable in the .env file";
-          exit 1;
-        fi;
-        echo 'ok' > /tmp/.unlock;
-        sleep 3;
-        echo "Setup done!";
-      '
-    healthcheck:
-      test: [ "CMD-SHELL", "[ -f /tmp/.unlock ]" ]
-      interval: 1s
-      timeout: 5s
-      retries: 120
-
   downloader:
     build:
       context: .
       args:
-        - UBUNTU_VERSION=${UBUNTU_VERSION:-22.04}
-    depends_on:
-      setup:
-        condition: service_healthy
-    image: ubuntu:${UBUNTU_VERSION:-22.04}-apk-offline
+        - CORE_IMAGE=${CORE_IMAGE}
+    image: aura/apt-offline-gui-builder:${BUILDER_TAG:-latest}
     user: "0:0"
-    privileged: true
     volumes:
-      - /usr/share/zoneinfo:/usr/share/zoneinfo
-      - /etc/ssl/certs:/etc/ssl/certs
-      - ./docker-entrypoint.sh:/docker-entrypoint.sh
-#      - ./output:/tmp/output:rw
+      - ./output:/output:rw
     environment:
-      - TZ=Asia/Shanghai
+      - CORE_IMAGE=${CORE_IMAGE}
+      - OUTPUT_ROOT=/output
+      - PINYIN_SOURCE_PACKAGE=${PINYIN_SOURCE_PACKAGE:-fcitx5-pinyin}
+      - CC_SWITCH_VERSION=${CC_SWITCH_VERSION}
+      - CC_SWITCH_DEB_URL=${CC_SWITCH_DEB_URL}
       - PKG_DOWNLOAD_LIST=${PKG_DOWNLOAD_LIST}
+      - NODE_VERSION=${NODE_VERSION}
+      - NVM_VERSION=${NVM_VERSION}
+      - NODE_DEFAULT_ENV=${NODE_DEFAULT_ENV:-tools}
+      - PNPM_VERSION=${PNPM_VERSION}
+      - OPENCODE_VERSION=${OPENCODE_VERSION}
+      - CODEX_VERSION=${CODEX_VERSION}
+      - CLAUDE_CODE_VERSION=${CLAUDE_CODE_VERSION}
+      - CLAUDE_CODE_ROUTER_VERSION=${CLAUDE_CODE_ROUTER_VERSION}
+      - NVM_ARCHIVE_URL=${NVM_ARCHIVE_URL}
+      - NODE_ARCHIVE_URL=${NODE_ARCHIVE_URL}

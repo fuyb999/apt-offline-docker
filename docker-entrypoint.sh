@@ -1,26 +1,92 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
-SAVE_PATH=/media
-rm -rf $SAVE_PATH/* /etc/apt/sources.list.d/archive_uri-https_mirrors_ustc_edu_cn_docker-ce_linux_ubuntu-jammy.list
+output_root="${OUTPUT_ROOT:-/output}"
+repo_dir="${output_root}/apt-offline-gui-repo"
+node_runtime_dir="${output_root}/node-runtime"
+source_package="${PINYIN_SOURCE_PACKAGE:-fcitx5-pinyin}"
 
-apt-get update && \
-apt-get -y upgrade && \
-  apt-offline set $SAVE_PATH/apt-offline.sig --update --upgrade --install-packages $PKG_DOWNLOAD_LIST && \
-#  apt-offline set $SAVE_PATH/apt-offline.sig --update --install-packages $PKG_DOWNLOAD_LIST && \
-  apt-offline get $SAVE_PATH/apt-offline.sig --bundle $SAVE_PATH/apt-offline.zip || true
+for variable_name in PKG_DOWNLOAD_LIST CC_SWITCH_VERSION CC_SWITCH_DEB_URL; do
+  if [ -z "${!variable_name:-}" ]; then
+    printf '%s is required\n' "${variable_name}" >&2
+    exit 2
+  fi
+done
 
-apt-get install -y dpkg-dev unzip
+read -r -a packages <<< "${PKG_DOWNLOAD_LIST}"
+if [ "${#packages[@]}" -eq 0 ]; then
+  printf 'PKG_DOWNLOAD_LIST did not contain any packages\n' >&2
+  exit 2
+fi
 
-unzip $SAVE_PATH/apt-offline.zip -d $SAVE_PATH/apt-offline
-cd $SAVE_PATH/apt-offline/ && dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz && cd -
+rm -rf "${repo_dir}"
+install -d -m 0755 "${repo_dir}"
+install -d -m 0700 -o _apt -g root "${repo_dir}/partial"
 
-tee /etc/apt/sources.list.d/local.list << EOF
-deb [trusted=yes] file:$SAVE_PATH/apt-offline ./
-EOF
+dpkg-query -W -f='${binary:Package}=${Version}\n' \
+  | LC_ALL=C sort \
+  > "${repo_dir}/core-packages.lock"
 
-tar -Jcvf $SAVE_PATH/apt-offline-mirror.tar.xz $SAVE_PATH/apt-offline/ /etc/apt/sources.list.d/local.list
+printf 'Refreshing package metadata for %s\n' "${CORE_IMAGE:-the configured core image}"
+apt-get update
 
-echo 'done'
-tail -f /dev/null
+cc_switch_deb="${repo_dir}/cc-switch_${CC_SWITCH_VERSION}_amd64.deb"
+printf 'Downloading CC Switch %s\n' "${CC_SWITCH_VERSION}"
+curl -fL --retry 3 "${CC_SWITCH_DEB_URL}" -o "${cc_switch_deb}"
+if [ "$(dpkg-deb -f "${cc_switch_deb}" Package)" != "cc-switch" ] || \
+   [ "$(dpkg-deb -f "${cc_switch_deb}" Version)" != "${CC_SWITCH_VERSION}" ]; then
+  printf 'Downloaded CC Switch package metadata does not match %s\n' "${CC_SWITCH_VERSION}" >&2
+  exit 1
+fi
+
+printf 'Downloading GUI, development and CC Switch dependency closure\n'
+apt-get install \
+  --download-only \
+  --no-install-recommends \
+  -y \
+  -o "Dir::Cache::archives=${repo_dir}" \
+  "${packages[@]}" \
+  "${cc_switch_deb}"
+
+source_dir="$(mktemp -d)"
+chown _apt:root "${source_dir}"
+cleanup() {
+  rm -rf "${source_dir}"
+}
+trap cleanup EXIT
+
+(
+  cd "${source_dir}"
+  apt-get download "${source_package}"
+)
+
+source_deb="$(find "${source_dir}" -maxdepth 1 -type f -name 'fcitx5-pinyin_*.deb' -print -quit)"
+if [ -z "${source_deb}" ]; then
+  printf 'Unable to download %s\n' "${source_package}" >&2
+  exit 1
+fi
+
+repack-fcitx5-pinyin-runtime.sh "${source_deb}" "${repo_dir}" > /dev/null
+rm -rf "${repo_dir}/partial" "${repo_dir}/lock"
+
+generate-packages-index.sh "${repo_dir}"
+
+printf '%s\n' "${packages[@]}" > "${repo_dir}/download-packages.txt"
+printf '%s\n' cc-switch >> "${repo_dir}/download-packages.txt"
+{
+  printf 'CORE_IMAGE=%s\n' "${CORE_IMAGE:-unknown}"
+  printf 'PINYIN_SOURCE_PACKAGE=%s\n' "${source_package}"
+  printf 'CC_SWITCH_VERSION=%s\n' "${CC_SWITCH_VERSION}"
+  printf 'PACKAGE_SET_SHA256=%s\n' "$(sha256sum "${repo_dir}/download-packages.txt" | awk '{print $1}')"
+  printf 'GENERATED_AT=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+} > "${repo_dir}/manifest.env"
+
+package_count="$(find "${repo_dir}" -maxdepth 1 -type f -name '*.deb' | wc -l)"
+repo_size="$(du -sh "${repo_dir}" | awk '{print $1}')"
+printf 'Created %s with %s packages (%s)\n' "${repo_dir}" "${package_count}" "${repo_size}"
+
+trap - EXIT
+cleanup
+
+build-node-runtime.sh "${node_runtime_dir}"
