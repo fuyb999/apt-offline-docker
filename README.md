@@ -9,8 +9,16 @@ The GUI repository includes:
 - Openbox, LXQt Panel and PCManFM-Qt desktop mode;
 - Fcitx5 native pinyin without Rime or Qt WebEngine;
 - GTK, WebKit and AppIndicator libraries required by CC Switch;
+- Chrome and TurboVNC hard dependencies such as `fonts-liberation`, `libnspr4`,
+  `libnss3`, `libxfont2` and `xdg-utils`;
+- GTK2/3/4 Fcitx5 frontends, fonts, portals, PipeWire/RTKit and Intel graphics
+  packages used by local desktop applications;
 - CC Switch 3.14.1;
 - the pinned development and Python package closure requested by the runtime.
+
+The compatibility set intentionally does not restore `pcmanfm`, Fcitx5 Rime,
+Fcitx5 Table, the `fcitx5-chinese-addons` meta-package or wildcard Fcitx5
+modules. PCManFM-Qt and the split native-pinyin runtime replace those packages.
 
 The Node output includes NVM 0.40.4, Node.js 24.17.0 and one merged `tools`
 environment with pinned pnpm, OpenCode, Codex, Claude Code and Claude Code
@@ -68,7 +76,7 @@ Alternatively, bind-mount each output directory directly to the corresponding
 `/opt/addons/softwares/...` path. The runtime reads the repository and archives
 directly; it does not embed them in the Docker image.
 
-On 2026-07-15, the generated GUI repository was approximately 266 MiB and the
+On 2026-07-15, the generated GUI repository was approximately 361 MiB and the
 Node runtime directory was approximately 271 MiB. The compressed Node tools
 archive was approximately 241 MiB and expands to approximately 1.0 GiB when
 installed.

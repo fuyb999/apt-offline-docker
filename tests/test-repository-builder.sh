@@ -63,6 +63,51 @@ assert_contains "${env_file}" 'libimepinyin0'
 assert_contains "${env_file}" 'build-essential'
 assert_contains "${env_file}" 'libwebkit2gtk-4.1-0'
 assert_contains "${env_file}" 'python3-venv'
+packages_line="$(grep '^PKG_DOWNLOAD_LIST=' "${env_file}" || true)"
+[ -n "${packages_line}" ] || fail 'PKG_DOWNLOAD_LIST is missing'
+read -r -a configured_packages <<< "${packages_line#PKG_DOWNLOAD_LIST=}"
+
+has_package() {
+    local expected="$1"
+    local configured=""
+
+    for configured in "${configured_packages[@]}"; do
+        [ "${configured}" = "${expected}" ] && return 0
+    done
+    return 1
+}
+
+for package in \
+    at-spi2-core \
+    avahi-utils \
+    fcitx5-frontend-gtk2 \
+    fcitx5-frontend-gtk3 \
+    fcitx5-frontend-gtk4 \
+    fonts-dejavu \
+    fonts-firacode \
+    fonts-liberation \
+    fonts-noto-cjk \
+    fonts-noto-color-emoji \
+    fonts-wqy-microhei \
+    i965-va-driver-shaders \
+    intel-media-va-driver-non-free \
+    iptables \
+    libnspr4 \
+    libnss3 \
+    libpulse-mainloop-glib0 \
+    libxfont2 \
+    libpixman-1-0 \
+    libxcb-image0 \
+    libxcb-render-util0 \
+    pipewire \
+    rtkit \
+    xdg-desktop-portal \
+    xdg-desktop-portal-gtk \
+    xdg-utils \
+    xserver-xorg-video-intel; do
+    has_package "${package}" || fail "PKG_DOWNLOAD_LIST is missing addon runtime dependency ${package}"
+done
+
 assert_not_contains "${env_file}" 'fcitx5-module-*'
 assert_not_contains "${env_file}" 'fcitx5-chinese-addons '
 
