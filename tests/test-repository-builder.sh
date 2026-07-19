@@ -78,6 +78,14 @@ has_package() {
 }
 
 for package in \
+    openbox \
+    lxqt-panel \
+    pcmanfm-qt \
+    qterminal; do
+    has_package "${package}" || fail "PKG_DOWNLOAD_LIST is missing ${package}"
+done
+
+for package in \
     at-spi2-core \
     avahi-utils \
     fcitx5-frontend-gtk2 \
@@ -106,6 +114,15 @@ for package in \
     xdg-utils \
     xserver-xorg-video-intel; do
     has_package "${package}" || fail "PKG_DOWNLOAD_LIST is missing addon runtime dependency ${package}"
+done
+
+for package in \
+    pcmanfm \
+    lxqt \
+    lxqt-core; do
+    if has_package "${package}"; then
+        fail "PKG_DOWNLOAD_LIST unexpectedly contains ${package}"
+    fi
 done
 
 assert_not_contains "${env_file}" 'fcitx5-module-*'
