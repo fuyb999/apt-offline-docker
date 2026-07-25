@@ -77,6 +77,7 @@ has_package() {
     return 1
 }
 
+    dbus \
 for package in \
     openbox \
     lxqt-panel \
@@ -100,6 +101,7 @@ for package in \
     i965-va-driver-shaders \
     intel-media-va-driver-non-free \
     iptables \
+    libcups2 \
     libnspr4 \
     libnss3 \
     libpulse-mainloop-glib0 \
