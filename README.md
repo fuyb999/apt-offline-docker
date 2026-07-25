@@ -20,9 +20,13 @@ The compatibility set intentionally does not restore `pcmanfm`, Fcitx5 Rime,
 Fcitx5 Table, the `fcitx5-chinese-addons` meta-package or wildcard Fcitx5
 modules. PCManFM-Qt and the split native-pinyin runtime replace those packages.
 
-The Node output includes NVM 0.40.4, Node.js 24.17.0 and one merged `tools`
-environment with pinned pnpm, OpenCode, Codex, Claude Code and Claude Code
-Router packages.
+The Node output includes NVM 0.40.4, Node.js 24.17.0, Bun 1.3.14 and one
+merged `tools` environment with pinned pnpm, OpenCode, Codex, Claude Code and
+Claude Code Router packages.
+
+`node-tools.packages` is a mixed version inventory containing npm package
+specifications and the Bun binary component version. It is not a per-package
+integrity record for the installed npm contents.
 
 ## Required build order
 
@@ -65,6 +69,10 @@ output/
     └── nvm-v0.40.4.tar.gz
 ```
 
+Bun and the relative `bin/bunx -> bun` symlink are bundled inside
+`node-tools.tar.xz`, so Bun does not add a standalone archive or any new file
+to the output tree.
+
 Copy the directories to the runtime project:
 
 ```text
@@ -76,10 +84,12 @@ Alternatively, bind-mount each output directory directly to the corresponding
 `/opt/addons/softwares/...` path. The runtime reads the repository and archives
 directly; it does not embed them in the Docker image.
 
-On 2026-07-15, the generated GUI repository was approximately 361 MiB and the
-Node runtime directory was approximately 271 MiB. The compressed Node tools
-archive was approximately 241 MiB and expands to approximately 1.0 GiB when
-installed.
+The generated GUI repository was approximately 361 MiB on 2026-07-15; it was
+not rebuilt or refreshed for this measurement. On 2026-07-23, the current
+`output/node-runtime` directory is 309,157,575 bytes (`du` reports approximately
+295 MiB), and `node-tools.tar.xz` is 277,366,156 bytes (approximately 264.5 MiB).
+The XZ record reports an uncompressed tar stream of 1,165,015,040 bytes
+(approximately 1.085 GiB).
 
 ## Native pinyin split
 
@@ -93,7 +103,9 @@ available.
 
 - APT dependencies are resolved with `--download-only --no-install-recommends`.
 - The flat repository includes exact package metadata and checksums.
-- NVM, Node and npm packages are pinned and checksummed in `manifest.env`.
+- The Bun source ZIP is verified against its pinned SHA256 before extraction.
+- The mixed component version inventory and final Node tools archive are
+  checksummed in `manifest.env`.
 - Runtime installation succeeds with Docker `--network=none`.
 - Qt WebEngine, Fcitx5 Rime and floating npm `@latest` packages are prohibited
   by regression tests.

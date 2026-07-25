@@ -53,11 +53,21 @@ assert_not_contains "${entrypoint}" 'tail -f /dev/null'
 
 assert_contains "${compose_file}" 'CORE_IMAGE=${CORE_IMAGE}'
 assert_contains "${compose_file}" './output:/output:rw'
+assert_contains "${compose_file}" 'BUN_VERSION=${BUN_VERSION}'
+assert_contains "${compose_file}" 'BUN_ARCHIVE_URL=${BUN_ARCHIVE_URL}'
+assert_contains "${compose_file}" 'NVM_ARCHIVE_SHA256=${NVM_ARCHIVE_SHA256}'
+assert_contains "${compose_file}" 'NODE_ARCHIVE_SHA256=${NODE_ARCHIVE_SHA256}'
+assert_contains "${compose_file}" 'BUN_ARCHIVE_SHA256=${BUN_ARCHIVE_SHA256}'
 assert_contains "${env_file}" 'CORE_IMAGE='
 assert_contains "${env_file}" 'CC_SWITCH_VERSION=3.14.1'
 assert_contains "${env_file}" 'NODE_VERSION=24.17.0'
 assert_contains "${env_file}" 'NVM_VERSION=0.40.4'
 assert_contains "${env_file}" 'NODE_DEFAULT_ENV=tools'
+assert_contains "${env_file}" 'BUN_VERSION=1.3.14'
+assert_contains "${env_file}" 'BUN_ARCHIVE_URL=https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-linux-x64.zip'
+assert_contains "${env_file}" 'NVM_ARCHIVE_SHA256=5949b50e4640f2be2263f963952673d7f1a8745a83f05365e99f032fe78307fd'
+assert_contains "${env_file}" 'NODE_ARCHIVE_SHA256=ab343a1b747c7cbf3630dfd7dbf818c5423fab2eb4f5ad1afc896f6bd121a917'
+assert_contains "${env_file}" 'BUN_ARCHIVE_SHA256=951ee2aee855f08595aeec6225226a298d3fea83a3dcd6465c09cbccdf7e848f'
 assert_contains "${env_file}" 'fcitx5-module-punctuation'
 assert_contains "${env_file}" 'libimepinyin0'
 assert_contains "${env_file}" 'build-essential'
@@ -77,8 +87,8 @@ has_package() {
     return 1
 }
 
-    dbus \
 for package in \
+    dbus \
     openbox \
     lxqt-panel \
     pcmanfm-qt \
