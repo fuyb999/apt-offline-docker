@@ -149,7 +149,7 @@ while [ "$#" -gt 0 ]; do
 done
 [ -n "${prefix}" ]
 mkdir -p "${prefix}/bin" "${prefix}/lib/node_modules"
-for command_name in pnpm opencode codex claude ccr; do
+for command_name in pnpm opencode codex; do
   printf '#!/bin/bash\nexit 0\n' > "${prefix}/bin/${command_name}"
   chmod 0755 "${prefix}/bin/${command_name}"
 done
@@ -188,8 +188,6 @@ builder_variables=(
   PNPM_VERSION
   OPENCODE_VERSION
   CODEX_VERSION
-  CLAUDE_CODE_VERSION
-  CLAUDE_CODE_ROUTER_VERSION
   NVM_ARCHIVE_URL
   NODE_ARCHIVE_URL
   BUN_ARCHIVE_URL
@@ -212,8 +210,6 @@ run_builder() {
   PNPM_VERSION="${PNPM_VERSION-10.33.0}" \
   OPENCODE_VERSION="${OPENCODE_VERSION-1.17.20}" \
   CODEX_VERSION="${CODEX_VERSION-0.144.4}" \
-  CLAUDE_CODE_VERSION="${CLAUDE_CODE_VERSION-2.1.153}" \
-  CLAUDE_CODE_ROUTER_VERSION="${CLAUDE_CODE_ROUTER_VERSION-3.0.4}" \
   NVM_ARCHIVE_URL="${NVM_ARCHIVE_URL-${test_root}/nvm.tar.gz}" \
   NODE_ARCHIVE_URL="${NODE_ARCHIVE_URL-${test_root}/node.tar.xz}" \
   BUN_ARCHIVE_URL="${BUN_ARCHIVE_URL-${test_root}/bun.zip}" \
@@ -407,8 +403,6 @@ unsafe_variables=(
   PNPM_VERSION
   OPENCODE_VERSION
   CODEX_VERSION
-  CLAUDE_CODE_VERSION
-  CLAUDE_CODE_ROUTER_VERSION
 )
 unsafe_values=(
   '../escape'
@@ -545,8 +539,9 @@ done
 grep -Fqx 'pnpm@10.33.0' "${output_dir}/node-tools.packages"
 grep -Fqx 'opencode-ai@1.17.20' "${output_dir}/node-tools.packages"
 grep -Fqx '@openai/codex@0.144.4' "${output_dir}/node-tools.packages"
-grep -Fqx '@anthropic-ai/claude-code@2.1.153' "${output_dir}/node-tools.packages"
-grep -Fqx '@musistudio/claude-code-router@3.0.4' "${output_dir}/node-tools.packages"
+if grep -Eq '^(@anthropic-ai/claude-code|@musistudio/claude-code-router)@' "${output_dir}/node-tools.packages"; then
+  fail 'node-tools.packages still contains Claude Code tooling'
+fi
 grep -Fqx 'bun@1.3.14' "${output_dir}/node-tools.packages" || fail 'node-tools.packages is missing bun@1.3.14'
 
 grep -Fqx 'BUN_VERSION=1.3.14' "${output_dir}/manifest.env" || fail 'manifest is missing BUN_VERSION=1.3.14'
@@ -567,8 +562,11 @@ fi
 tools_extract="${test_root}/tools"
 mkdir -p "${tools_extract}"
 tar -Jxf "${output_dir}/node-tools.tar.xz" -C "${tools_extract}"
-for command_name in pnpm opencode codex claude ccr; do
+for command_name in pnpm opencode codex; do
   [ -x "${tools_extract}/bin/${command_name}" ] || fail "tools archive is missing ${command_name}"
+done
+for command_name in claude ccr; do
+  [ ! -e "${tools_extract}/bin/${command_name}" ] || fail "tools archive still contains ${command_name}"
 done
 [ -x "${tools_extract}/bin/bun" ] || fail 'tools archive is missing executable bin/bun'
 [ -L "${tools_extract}/bin/bunx" ] || fail 'tools archive is missing bin/bunx symlink'

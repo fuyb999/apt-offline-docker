@@ -7,6 +7,7 @@ base small while preserving fully offline installation.
 The GUI repository includes:
 
 - Openbox, LXQt Panel and PCManFM-Qt desktop mode;
+- LXQt File Archiver for common archive browsing and extraction;
 - Fcitx5 native pinyin without Rime or Qt WebEngine;
 - GTK, WebKit and AppIndicator libraries required by CC Switch;
 - Chrome and TurboVNC hard dependencies such as `fonts-liberation`, `libnspr4`,

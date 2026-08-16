@@ -32,12 +32,24 @@ printf 'Refreshing package metadata for %s\n' "${CORE_IMAGE:-the configured core
 apt-get update
 
 cc_switch_deb="${repo_dir}/cc-switch_${CC_SWITCH_VERSION}_amd64.deb"
-printf 'Downloading CC Switch %s\n' "${CC_SWITCH_VERSION}"
-curl -fL --retry 3 "${CC_SWITCH_DEB_URL}" -o "${cc_switch_deb}"
-if [ "$(dpkg-deb -f "${cc_switch_deb}" Package)" != "cc-switch" ] || \
-   [ "$(dpkg-deb -f "${cc_switch_deb}" Version)" != "${CC_SWITCH_VERSION}" ]; then
-  printf 'Downloaded CC Switch package metadata does not match %s\n' "${CC_SWITCH_VERSION}" >&2
-  exit 1
+cc_switch_package_matches() {
+  local package_path="$1"
+
+  [ -f "${package_path}" ] || return 1
+  [ "$(dpkg-deb -f "${package_path}" Package 2>/dev/null)" = "cc-switch" ] || return 1
+  [ "$(dpkg-deb -f "${package_path}" Version 2>/dev/null)" = "${CC_SWITCH_VERSION}" ]
+}
+
+if cc_switch_package_matches "${cc_switch_deb}"; then
+  printf 'Reusing cached CC Switch %s\n' "${CC_SWITCH_VERSION}"
+else
+  rm -f -- "${cc_switch_deb}"
+  printf 'Downloading CC Switch %s\n' "${CC_SWITCH_VERSION}"
+  curl -fL --retry 3 "${CC_SWITCH_DEB_URL}" -o "${cc_switch_deb}"
+  if ! cc_switch_package_matches "${cc_switch_deb}"; then
+    printf 'Downloaded CC Switch package metadata does not match %s\n' "${CC_SWITCH_VERSION}" >&2
+    exit 1
+  fi
 fi
 
 printf 'Downloading GUI, development and CC Switch dependency closure\n'

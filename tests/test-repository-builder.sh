@@ -4,6 +4,7 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 dockerfile="${repo_root}/Dockerfile"
+dockerignore="${repo_root}/.dockerignore"
 entrypoint="${repo_root}/docker-entrypoint.sh"
 compose_file="${repo_root}/docker-compose.yml"
 env_file="${repo_root}/.env"
@@ -32,6 +33,7 @@ assert_contains "${dockerfile}" 'FROM ${CORE_IMAGE}'
 assert_contains "${dockerfile}" 'repack-fcitx5-pinyin-runtime.sh'
 assert_contains "${dockerfile}" 'generate-packages-index.sh'
 assert_contains "${dockerfile}" 'build-node-runtime.sh'
+assert_contains "${dockerignore}" 'output/'
 
 for forbidden in pyinstaller apt-offline docker-ce nvidia-container-toolkit; do
     assert_not_contains "${dockerfile}" "${forbidden}"
@@ -44,6 +46,8 @@ assert_contains "${entrypoint}" 'generate-packages-index.sh'
 assert_contains "${entrypoint}" 'apt-offline-gui-repo'
 assert_contains "${entrypoint}" 'core-packages.lock'
 assert_contains "${entrypoint}" 'CC_SWITCH_DEB_URL'
+assert_contains "${entrypoint}" 'Reusing cached CC Switch'
+assert_contains "${entrypoint}" 'cc_switch_package_matches'
 assert_contains "${entrypoint}" 'build-node-runtime.sh'
 assert_contains "${entrypoint}" 'chown _apt:root "${source_dir}"'
 assert_contains "${entrypoint}" 'dpkg-query'
@@ -89,8 +93,12 @@ has_package() {
 
 for package in \
     dbus \
+    gvfs \
+    gvfs-daemons \
     openbox \
     lxqt-panel \
+    lxqt-theme-debian \
+    lxqt-archiver \
     pcmanfm-qt \
     qterminal; do
     has_package "${package}" || fail "PKG_DOWNLOAD_LIST is missing ${package}"
@@ -117,6 +125,8 @@ for package in \
     libpulse-mainloop-glib0 \
     libxfont2 \
     libpixman-1-0 \
+    libturbojpeg \
+    papirus-icon-theme \
     libxcb-image0 \
     libxcb-render-util0 \
     pipewire \

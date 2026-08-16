@@ -17,8 +17,6 @@ required_variables=(
   PNPM_VERSION
   OPENCODE_VERSION
   CODEX_VERSION
-  CLAUDE_CODE_VERSION
-  CLAUDE_CODE_ROUTER_VERSION
   NVM_ARCHIVE_URL
   NODE_ARCHIVE_URL
   BUN_ARCHIVE_URL
@@ -58,7 +56,7 @@ require_sha256() {
 require_safe_segment NODE_DEFAULT_ENV '^[A-Za-z0-9][A-Za-z0-9._-]*$'
 for variable_name in \
   NVM_VERSION NODE_VERSION BUN_VERSION PNPM_VERSION OPENCODE_VERSION \
-  CODEX_VERSION CLAUDE_CODE_VERSION CLAUDE_CODE_ROUTER_VERSION; do
+  CODEX_VERSION; do
   require_safe_segment "${variable_name}" '^[A-Za-z0-9][A-Za-z0-9._+-]*$'
 done
 for variable_name in NVM_ARCHIVE_SHA256 NODE_ARCHIVE_SHA256 BUN_ARCHIVE_SHA256; do
@@ -230,8 +228,6 @@ tool_packages=(
   "pnpm@${PNPM_VERSION}"
   "opencode-ai@${OPENCODE_VERSION}"
   "@openai/codex@${CODEX_VERSION}"
-  "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
-  "@musistudio/claude-code-router@${CLAUDE_CODE_ROUTER_VERSION}"
 )
 printf '%s\n' "${tool_packages[@]}" > "${packages_file}"
 printf 'bun@%s\n' "${BUN_VERSION}" >> "${packages_file}"
@@ -258,7 +254,7 @@ validate_tools_environment() {
   local actual_version=""
   local bunx_target=""
 
-  for command_name in pnpm opencode codex claude ccr bun bunx; do
+  for command_name in pnpm opencode codex bun bunx; do
     if [ ! -x "${root}/bin/${command_name}" ]; then
       printf 'Installed Node tools are missing executable bin/%s\n' \
         "${command_name}" >&2
