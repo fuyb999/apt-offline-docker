@@ -96,6 +96,8 @@ for package in \
     gvfs \
     gvfs-daemons \
     openbox \
+    obconf-qt \
+    obconf-qt-l10n \
     lxqt-panel \
     lxqt-theme-debian \
     lxqt-archiver \
